@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة MO FORA1ON الذكية | الإصدار 3.0</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --space-bg: #030712;
+            --neon-blue: #00d2ff;
+            --neon-purple: #9d50bb;
+            --sidebar-width: 280px;
+            --glass: rgba(255, 255, 255, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: var(--space-bg); color: #fff; overflow-x: hidden; }
+
+        #stars-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        }
+
+        header {
+            padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(3, 7, 18, 0.9); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--neon-blue); position: sticky; top: 0; z-index: 1000;
+        }
+
+        .menu-toggle { font-size: 1.5rem; color: var(--neon-blue); cursor: pointer; }
+        
+        .sidebar {
+            position: fixed; top: 0; left: -280px; width: var(--sidebar-width); height: 100%;
+            background: rgba(5, 11, 24, 0.98); z-index: 2000; transition: var(--transition);
+            border-right: 1px solid var(--neon-blue); padding: 40px 20px;
+        }
+        .sidebar.active { left: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1500; }
+
+        .nav-links { list-style: none; margin-top: 30px; }
+        .nav-links li { margin-bottom: 10px; }
+        .nav-links a {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            color: #fff; text-decoration: none; border-radius: 10px; background: var(--glass);
+        }
+        .nav-links a:hover { border: 1px solid var(--neon-blue); background: rgba(0,210,255,0.1); }
+
+        .container { padding: 30px 5%; max-width: 1000px; margin: auto; }
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: var(--glass); padding: 25px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); margin-bottom: 20px;
+        }
+
+        input, select, textarea {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px;
+            border: 1px solid var(--neon-blue); background: rgba(0,0,0,0.3); color: #fff; outline: none;
+        }
+
+        .btn {
+            padding: 12px 25px; border-radius: 10px; border: none; cursor: pointer;
+            font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-blue { background: var(--neon-blue); color: #000; }
+        .btn-purple { background: var(--neon-purple); color: #fff; }
+
+        .profile-img {
+            width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--neon-blue);
+            object-fit: cover; margin-bottom: 15px; cursor: pointer;
+        }
+
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px; margin: 20px 0; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+        .feed-item { border-bottom: 1px solid var(--glass); padding: 20px 0; }
+        .feed-item img, .feed-item video { max-width: 100%; border-radius: 10px; margin-top: 10px; }
+
+        footer { text-align: center; padding: 40px; border-top: 1px solid var(--glass); margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <div id="stars-canvas"></div>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div style="text-align: center;">
+            <img src="https://i.ibb.co/hRzBmVbp/file-000000008e3072469a8671cbc5a22c48.png" width="60">
+            <h3 style="color: var(--neon-blue); margin-top: 10px;">القائمة</h3>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showSection('home')"><i class="fas fa-home"></i> الرئيسية</a></li>
+            <li id="tab-student-reg"><a href="#" onclick="showSection('student-reg')"><i class="fas fa-user-plus"></i> تسجيل طالب</a></li>
+            <li id="tab-teacher-reg"><a href="#" onclick="showSection('teacher-reg')"><i class="fas fa-chalkboard-teacher"></i> تسجيل معلم</a></li>
+            <li id="tab-profile" style="display:none;"><a href="#" onclick="showSection('profile')"><i class="fas fa-id-card"></i> الملف الشخصي</a></li>
+            <li><a href="#" onclick="devLogin()"><i class="fas fa-code"></i> قسم المطور</a></li>
+            <li><a href="https://moaichat.netlify.app/" target="_blank"><i class="fas fa-robot"></i> غرفة الذكاء الاصطناعي</a></li>
+
+            <li>
+    <a href="https://facebook.com/share/g/1H8F36rrBg/" target="_blank">
+        <i class="fab fa-facebook"></i> جروب الفيسبوك
+    </a>
+</li>
+        </ul>
+    </div>
+
+    <header>
+        <div class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <h2 style="font-weight: 900;">مدرسة <span style="color: var(--neon-blue);">الشهيد علاء عزت</span></h2>
+            <img src="https://i.ibb.co/hRzBmVbp/file-000000008e3072469a8671cbc5a22c48.png" width="40">
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div id="home" class="section active">
+            <div class="card" style="text-align: center;">
+                <img src="https://i.ibb.co/hRzBmVbp/file-000000008e3072469a8671cbc5a22c48.png" alt="Logo" style="width: 150px; margin-bottom: 20px;">
+                <h1>مرحبا بك في منصة مدرسة الشهيد علاء عزت</h1>
+                
+                <div class="card" style="background: rgba(0, 210, 255, 0.1); text-align: right; margin-top: 20px;">
+                    <h3 style="color: var(--neon-blue);"><i class="fas fa-gavel"></i> قوانين وسلوك المدرسة</h3>
+                    <ul style="padding-right: 20px; line-height: 1.8;">
+                        <li>الالتزام بالآداب العامة واحترام المعلمين والزملاء.</li>
+                        <li>الحفاظ على سرية بيانات الدخول للأكواد والغرف التعليمية.</li>
+                        <li>يُمنع نشر أي محتوى خارج الإطار التعليمي داخل الغرف.</li>
+                        <li>التفاعل الإيجابي والمشاركة الفعالة في الدروس الرقمية.</li>
+                    </ul>
+                </div>
+
+                <div class="card" style="background: rgba(157, 80, 187, 0.1); text-align: right;">
+                    <h3 style="color: var(--neon-purple);"><i class="fas fa-bullseye"></i> هدف المنصة</h3>
+                    <p>نهدف إلى خلق بيئة تعليمية ذكية تدمج بين التكنولوجيا الحديثة والمناهج الدراسية، لتسهيل وصول الطلاب للمعلومات وتوفير أدوات تفاعلية للمعلمين تمكنهم من إدارة العملية التعليمية بمرونة فائقة.</p>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-play-circle"></i> فيديو شرح المنصة</h3>
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/9AieyuFMMXg" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                <img src="https://i.ibb.co/5h4Dgm4v/Videoshot-20260422-165800-2.jpg" alt="Robot AI" style="width: 100%; border-radius: 20px; margin-top: 20px; box-shadow: 0 0 20px var(--neon-blue);">
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-rss"></i> آخر التحديثات والمنشورات</h3>
+                <div id="publicFeed">
+                    <p style="opacity: 0.5; text-align: center;">جاري تحميل المنشورات...</p>
+                </div>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <p style="opacity: 0.7;">ابحث عن غرفتك التعليمية</p>
+                <div style="position: relative; margin-top: 20px;">
+                    <input type="text" id="mainSearch" placeholder="أدخل كود الغرفة..." style="border-radius: 50px; padding-right: 45px;">
+                    <button class="btn btn-blue" onclick="searchRoom()" style="position: absolute; left: 5px; top: 15px; border-radius: 50px;">بحث</button>
+                </div>
+            </div>
+            <div id="roomResult" class="card" style="display: none;"></div>
+        </div>
+
+        <div id="dev-section" class="section">
+            <div class="card">
+                <h2><i class="fas fa-user-shield"></i> لوحة تحكم المطور</h2>
+                <div class="card">
+                    <h3>نشر محتوى جديد للرئيسية</h3>
+                    <textarea id="dev-text" placeholder="اكتب وصف المنشور..."></textarea>
+                    <input type="text" id="dev-link" placeholder="ضع رابط (صورة، فيديو يوتيوب، أو ملف)">
+                    <select id="dev-type">
+                        <option value="image">صورة</option>
+                        <option value="video">فيديو (يوتيوب)</option>
+                        <option value="file">ملف / رابط</option>
+                    </select>
+                    <button class="btn btn-blue" onclick="publishPost()">نشر الآن</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="student-reg" class="section">
+    <div class="card">
+        <h3><i class="fas fa-user-graduate"></i> تسجيل طالب جديد</h3>
+        <input type="text" id="s-name" placeholder="الاسم الكامل">
+        <input type="tel" id="s-phone" placeholder="رقم الهاتف">
+        <input type="email" id="s-email" placeholder="البريد الإلكتروني">
+        <select id="s-grade">
+            <option>الصف الأول الثانوي</option>
+            <option>الصف الثاني الثانوي</option>
+            <option>الصف الثالث الثانوي</option>
+        </select>
+        <p style="margin-top:10px;">اختر صورة البروفايل:</p>
+        <input type="file" id="s-avatar" accept="image/*">
+        <button class="btn btn-blue" onclick="registerUser('student')">إنشاء حساب الطالب</button>
+    </div>
+</div>
+
+<div id="teacher-reg" class="section">
+    <div class="card">
+        <h3><i class="fas fa-user-tie"></i> تسجيل معلم جديد</h3>
+        <input type="text" id="t-name" placeholder="الاسم الكامل">
+        <input type="text" id="t-subject" placeholder="المادة العلمية">
+        <input type="tel" id="t-phone" placeholder="رقم الهاتف">
+        <input type="email" id="t-email" placeholder="البريد الإلكتروني">
+        <p style="margin-top:10px;">اختر صورة البروفايل:</p>
+        <input type="file" id="t-avatar" accept="image/*">
+        <button class="btn btn-purple" onclick="registerUser('teacher')">إنشاء حساب المعلم</button>
+    </div>
+</div>
+
+
+        <div id="profile" class="section">
+    <div class="card profile-header" style="text-align:center;">
+        <img src="" id="userAvatar" class="profile-img">
+        <h2 id="userNameDisplay"></h2>
+        <p id="userSubDisplay"></p>
+        
+        <div style="margin-top: 15px;">
+            <button class="btn" style="background: #e63946; color: #fff; font-size: 0.9rem;" onclick="deleteAccount()">
+                <i class="fas fa-user-times"></i> حذف الملف الشخصي
+            </button>
+        </div>
+
+        <div id="teacherActions" style="display: none; margin-top: 20px;">
+    <div class="card">
+        <h3>إدارة المحتوى التعليمي</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;">
+            <button class="btn btn-blue" onclick="showRoomForm()">+ إنشاء غرفة جديدة</button>
+            <button class="btn btn-purple" onclick="loadMyRooms()">غرفي المتاحة</button>
+            
+            <a href="https://emthanatyschool.netlify.app/" target="_blank" class="btn" style="background: #ff9800; color: #fff; text-decoration: none;">
+                <i class="fas fa-edit"></i> بوابة إنشاء الامتحانات
+            </a>
+        </div>
+        
+        <div id="roomForm" class="card" style="display: none; margin-top: 20px; border: 1px dashed var(--neon-blue);">
+    <h3 style="color: var(--neon-blue); text-align: center;">🔨 إنشاء غرفة تعليمية جديدة</h3>
+    
+    <label>اسم الغرفة (مثلاً: فيزياء أولى ثانوي):</label>
+    <input type="text" id="r-name" placeholder="ادخل اسم الغرفة">
+    
+    <label>كود الغرفة:</label>
+    <div style="display: flex; gap: 5px;">
+        <input type="text" id="r-code" placeholder="مثال: PHYS101" style="flex: 1;">
+        <button class="btn btn-purple" style="padding: 0 15px;" onclick="generateUniqueCode()">
+            <i class="fas fa-magic"></i> توليد كود
+        </button>
+    </div>
+    
+    <label style="margin-top: 10px; display: block;">كلمة مرور الغرفة:</label>
+    <input type="password" id="r-pass" placeholder="كلمة سر خاصة بالطلاب">
+    
+    <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button class="btn btn-blue" style="flex: 1;" onclick="saveRoom()">حفظ ونشر الغرفة</button>
+        <button class="btn" style="background: #444; color: #fff;" onclick="document.getElementById('roomForm').style.display='none'">إلغاء</button>
+    </div>
+</div>
+
+
+        <div id="room-content-manager" style="border-top: 1px solid var(--glass); padding-top: 20px; text-align: right;">
+            <h3 style="color: var(--neon-blue); text-align: center; margin-bottom: 20px;">
+                <i class="fas fa-edit"></i> إضافة محتوى للغرفة الذكية
+            </h3>
+            
+            <select id="target-room-select" style="margin-bottom: 15px; border-color: var(--neon-purple);">
+                <option value="">-- اختر الغرفة التي تريد النشر فيها --</option>
+            </select>
+
+            <div class="upload-section" style="margin-bottom: 15px;">
+                <label><i class="fas fa-pen-nib"></i> نص المنشور:</label>
+                <textarea id="post-text" placeholder="اكتب تعليماتك أو شرحك للطلاب هنا..."></textarea>
+            </div>
+
+            <div class="upload-section" style="margin-bottom: 15px;">
+                <label><i class="fas fa-image"></i> رابط الصورة المباشر:</label>
+                <input type="text" id="post-image-link" placeholder="https://example.com/image.jpg">
+                <small style="color: #00d2ff; display: block; margin-top: 5px;">
+                    <i class="fas fa-info-circle"></i> لرفع استضافة للصورة ادخل على موقع 
+                    <a href="https://imgbb.com/" target="_blank" style="color: #fff; text-decoration: underline;">imgBB</a>
+                </small>
+            </div>
+
+            <div class="upload-section" style="margin-bottom: 15px;">
+                <label><i class="fas fa-video"></i> رابط فيديو (يوتيوب):</label>
+                <input type="text" id="post-video-link" placeholder="https://www.youtube.com/watch?v=...">
+                <small style="color: #9d50bb; display: block; margin-top: 5px;">
+                    <i class="fas fa-info-circle"></i> لرفع فيديو قم برفعه على منصة 
+                    <a href="https://youtube.com" target="_blank" style="color: #fff; text-decoration: underline;">اليوتيوب</a> أولاً.
+                </small>
+            </div>
+
+            <div class="upload-section" style="margin-bottom: 15px;">
+                <label><i class="fas fa-file-pdf"></i> رابط ملف PDF:</label>
+                <input type="text" id="post-pdf-link" placeholder="ضع رابط التحميل المباشر هنا">
+                <small style="color: #ff9800; display: block; margin-top: 5px;">
+                    <i class="fas fa-info-circle"></i> ارفع الملف على 
+                    <a href="https://mediafire.com" target="_blank" style="color: #fff; text-decoration: underline;">MediaFire</a> وسيتم عرضه مباشرة للطلاب.
+                </small>
+            </div>
+
+            <button class="btn btn-blue" onclick="publishRoomContent()" style="width: 100%; font-size: 1.1rem; margin-top: 10px;">
+                <i class="fas fa-share-square"></i> نشر المحتوى فوراً
+            </button>
+        </div>
+    </div>
+</div>
+            </div> <footer style="text-align: center; padding: 30px; border-top: 1px solid var(--glass); background: rgba(3, 7, 18, 0.95); position: relative; z-index: 10;">
+        <p style="font-weight: bold; color: var(--neon-blue); margin-bottom: 10px;">
+            جميع الحقوق محفوظة © 2026 - المطور محمد عزام ✓
+        </p>
+        <p style="font-size: 0.85rem; opacity: 0.7;">
+            تحت إشراف أ/ ميرڤت (مدير المدرسة) & أ/ محمد صالح
+        </p>
+    </footer>
+
+    <script>
+        const DB_URL = "https://mofora1on-55b01-default-rtdb.firebaseio.com/";
+        let currentUser = JSON.parse(localStorage.getItem('mo_user')) || null;
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').style.display = document.getElementById('sidebar').classList.contains('active') ? 'block' : 'none';
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'profile') renderProfile();
+            if(id === 'home') loadFeed();
+            window.scrollTo(0,0);
+        }
+
+        function devLogin() {
+            const pass = prompt("أدخل كلمة مرور المطور:");
+            if(pass === "Std#000000@m") {
+                showSection('dev-section');
+            } else {
+                alert("كلمة مرور خاطئة!");
+            }
+        }
+
+        async function publishPost() {
+            const text = document.getElementById('dev-text').value;
+            const link = document.getElementById('dev-link').value;
+            const type = document.getElementById('dev-type').value;
+
+            if(!text) return alert("اكتب وصفاً للمنشور");
+
+            const postData = {
+                text, link, type, date: new Date().toLocaleString('ar-EG')
+            };
+
+            await fetch(`${DB_URL}/feed.json`, { method: 'POST', body: JSON.stringify(postData) });
+            alert("تم النشر بنجاح!");
+            showSection('home');
+        }
+
+        async function loadFeed() {
+            const res = await fetch(`${DB_URL}/feed.json`);
+            const data = await res.json();
+            const feedBox = document.getElementById('publicFeed');
+            feedBox.innerHTML = "";
+
+            if(!data) {
+                feedBox.innerHTML = "<p>لا توجد منشورات حالياً.</p>";
+                return;
+            }
+
+            Object.values(data).reverse().forEach(post => {
+                let mediaHtml = "";
+                if(post.type === 'image') mediaHtml = `<img src="${post.link}">`;
+                if(post.type === 'video') {
+                    const vidId = post.link.split('v=')[1]?.split('&')[0] || post.link.split('/').pop();
+                    mediaHtml = `<div class="video-container"><iframe src="https://www.youtube.com/embed/${vidId}"></iframe></div>`;
+                }
+                if(post.type === 'file') mediaHtml = `<a href="${post.link}" target="_blank" class="btn btn-purple" style="margin-top:10px;">📎 تحميل الملف / الرابط</a>`;
+
+                feedBox.innerHTML += `
+                    <div class="feed-item">
+                        <small style="color:var(--neon-blue)">${post.date}</small>
+                        <p style="margin-top:10px;">${post.text}</p>
+                        ${mediaHtml}
+                    </div>
+                `;
+            });
+        }
+
+        async function registerUser(type) {
+    // سحب الاسم بناءً على نوع المستخدم
+    const name = type === 'student' ? document.getElementById('s-name').value : document.getElementById('t-name').value;
+    
+    // التعديل الجوهري: سحب البريد الإلكتروني الحقيقي للمعلم أو الطالب
+    const email = type === 'student' ? document.getElementById('s-email').value : document.getElementById('t-email').value;
+    
+    // سحب المعلومة الإضافية (الصف للطالب أو المادة للمعلم)
+    const info = type === 'student' ? document.getElementById('s-grade').value : document.getElementById('t-subject').value;
+    
+    if(!name || !email) return alert("برجاء إدخال الاسم والبريد الإلكتروني");
+
+    const userData = { 
+        type, 
+        name, 
+        email, 
+        info, 
+        avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+    };
+
+    try {
+        const res = await fetch(`${DB_URL}/users.json`, { 
+            method: 'POST', 
+            body: JSON.stringify(userData) 
+        });
+        const result = await res.json();
+        
+        // حفظ المعرف الفريد (ID) من فايربيس لاستخدامه في الحذف أو التعديل لاحقاً
+        userData.id = result.name; 
+        
+        localStorage.setItem('mo_user', JSON.stringify(userData));
+        currentUser = userData;
+        
+        updateTabs();
+        showSection('profile');
+        alert(`تم تسجيلك بنجاح يا ${type === 'student' ? 'بطل' : 'يا مستر'}`);
+    } catch (error) {
+        alert("حدث خطأ في التسجيل، تأكد من اتصالك بالإنترنت");
+    }
+}
+
+
+        function updateTabs() {
+            if(currentUser) {
+                if(document.getElementById('tab-student-reg')) document.getElementById('tab-student-reg').style.display = 'none';
+                if(document.getElementById('tab-teacher-reg')) document.getElementById('tab-teacher-reg').style.display = 'none';
+                document.getElementById('tab-profile').style.display = 'block';
+            }
+        }
+
+        function renderProfile() {
+            if(!currentUser) return;
+            document.getElementById('userNameDisplay').innerText = currentUser.name;
+            document.getElementById('userSubDisplay').innerText = currentUser.info;
+            document.getElementById('userAvatar').src = currentUser.avatar;
+            if(currentUser.type === 'teacher') {
+                document.getElementById('teacherActions').style.display = 'block';
+            }
+        }
+
+        function showRoomForm() {
+    document.getElementById('roomForm').style.display = 'block';
+    // التمرير لأسفل لرؤية الفورم بوضوح
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+function generateUniqueCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('r-code').value = "MO-" + result;
+}
+
+async function saveRoom() {
+    const name = document.getElementById('r-name').value;
+    const code = document.getElementById('r-code').value;
+    const pass = document.getElementById('r-pass').value;
+
+    if(!name || !code || !pass) return alert("برجاء إكمال جميع البيانات!");
+
+    try {
+        const res = await fetch(`${DB_URL}/rooms.json`);
+        const rooms = await res.json();
+        
+        // فحص تكرار الكود
+        const isCodeTaken = Object.values(rooms || {}).some(room => room.code === code);
+
+        if (isCodeTaken) {
+            alert("⚠️ الكود ده محجوز لغرفة تانية! دوس على 'توليد كود' عشان تطلع كود جديد.");
+            return;
+        }
+
+        const roomData = { 
+            name, code, pass, 
+            teacher: currentUser.name, 
+            subject: currentUser.info 
+        };
+
+        await fetch(`${DB_URL}/rooms.json`, { method: 'POST', body: JSON.stringify(roomData) });
+        alert("✅ مبروك! الغرفة اتعملت والكود بتاعها جاهز.");
+        document.getElementById('roomForm').style.display = 'none';
+        
+    } catch (error) {
+        alert("🚨 حصلت مشكلة في السيرفر، جرب تاني.");
+    }
+}
+
+
+        // --- دالة البحث عن غرفة وعرض محتواها للطلاب ---
+async function searchRoom() {
+    const query = document.getElementById('mainSearch').value;
+    if(!query) return alert("ادخل كود الغرفة");
+    
+    try {
+        const res = await fetch(`${DB_URL}/rooms.json`);
+        const rooms = await res.json();
+        
+        // البحث عن الغرفة بالكود
+        let roomId = Object.keys(rooms || {}).find(key => rooms[key].code === query);
+        let found = rooms[roomId];
+
+        if(found) {
+            const pass = prompt("ادخل كلمة مرور الغرفة:");
+            if(pass === found.pass) {
+                const box = document.getElementById('roomResult');
+                box.style.display = 'block';
+                box.innerHTML = `
+                    <div style="border-bottom: 2px solid var(--neon-blue); padding-bottom:10px; margin-bottom:15px;">
+                        <h3>📚 غرفة: ${found.name}</h3>
+                        <small>المعلم: ${found.teacher} | المادة: ${found.subject}</small>
+                    </div>
+                    <div id="roomPostsDisplay">جاري تحميل الدروس...</div>
+                `;
+                // بعد فتح الغرفة بنجاح، نحمل المنشورات الخاصة بها فقط
+                loadRoomSpecificPosts(roomId);
+            } else { alert("كلمة المرور خاطئة!"); }
+        } else { alert("الغرفة غير موجودة"); }
+    } catch(e) { alert("خطأ في الاتصال"); }
+}
+
+// --- دالة جلب منشورات غرفة معينة فقط ---
+async function loadRoomSpecificPosts(roomId) {
+    const display = document.getElementById('roomPostsDisplay');
+    try {
+        const res = await fetch(`${DB_URL}/room_posts/${roomId}.json`);
+        const posts = await res.json();
+        
+        if(!posts) {
+            display.innerHTML = "<p style='text-align:center; opacity:0.5;'>لا توجد دروس منشورة في هذه الغرفة بعد.</p>";
+            return;
+        }
+
+        display.innerHTML = "";
+        Object.values(posts).reverse().forEach(post => {
+            let content = `<div class="feed-item" style="background:rgba(255,255,255,0.02); padding:15px; border-radius:10px; margin-bottom:10px;">
+                <small style="color:var(--neon-purple)">${post.timestamp}</small>
+                <p style="margin:10px 0;">${post.text}</p>`;
+            
+            if(post.image) content += `<img src="${post.image}" style="width:100%; border-radius:8px;">`;
+            if(post.video) {
+                let vidId = post.video.split('v=')[1]?.split('&')[0] || post.video.split('/').pop();
+                content += `<div class="video-container"><iframe src="https://www.youtube.com/embed/${vidId}"></iframe></div>`;
+            }
+            if(post.pdf) content += `<a href="${post.pdf}" target="_blank" class="btn btn-purple" style="width:100%; margin-top:10px;">📖 عرض الملف الدراسي</a>`;
+            
+            content += `</div>`;
+            display.innerHTML += content;
+        });
+    } catch(e) { display.innerHTML = "فشل تحميل المحتوى."; }
+}
+
+
+        // --- أضف دالة حذف الحساب هنا ---
+        async function deleteAccount() {
+            if (!currentUser || !currentUser.id) {
+                alert("لم يتم العثور على بيانات المستخدم!");
+                return;
+            }
+
+            const confirmDelete = confirm("🚨 تحذير: هل أنت متأكد من حذف حسابك نهائياً؟");
+
+            if (confirmDelete) {
+                try {
+                    // حذف البيانات من قاعدة بيانات فايربيس
+                    const response = await fetch(`${DB_URL}/users/${currentUser.id}.json`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        localStorage.removeItem('mo_user');
+                        alert("تم حذف الحساب بنجاح.");
+                        location.reload();
+                    } else {
+                        alert("حدث خطأ أثناء محاولة الحذف.");
+                    }
+                } catch (error) {
+                    alert("فشل الاتصال بقاعدة البيانات.");
+                }
+            }
+        }
+
+        // تأكد أن window.onload هي آخر شيء في السكريبت
+        window.onload = () => { 
+            updateTabs();
+            loadFeed();
+        };
+        // --- كود نشر محتوى الغرف الذكية ---
+async function publishRoomContent() {
+    const roomId = document.getElementById('target-room-select').value;
+    if (!roomId) return alert("من فضلك اختر الغرفة أولاً!");
+
+    const postData = {
+        teacher: currentUser.name,
+        text: document.getElementById('post-text').value,
+        image: document.getElementById('post-image-link').value,
+        video: document.getElementById('post-video-link').value,
+        pdf: document.getElementById('post-pdf-link').value,
+        timestamp: new Date().toLocaleString('ar-EG'),
+        teacherId: currentUser.id
+    };
+
+    try {
+        // إرسال البيانات إلى Firebase في فرع room_posts
+        const response = await fetch(`${DB_URL}/room_posts/${roomId}.json`, {
+            method: 'POST',
+            body: JSON.stringify(postData)
+        });
+
+        if (response.ok) {
+            alert("✅ تم نشر المحتوى بنجاح في الغرفة!");
+            // تفريغ الحقول بعد النشر لسهولة الاستخدام
+            document.getElementById('post-text').value = "";
+            document.getElementById('post-image-link').value = "";
+            document.getElementById('post-video-link').value = "";
+            document.getElementById('post-pdf-link').value = "";
+        } else {
+            alert("❌ حدث خطأ أثناء النشر.");
+        }
+    } catch (error) {
+        alert("🚨 فشل الاتصال بقاعدة البيانات.");
+    }
+}
+
+// --- دالة تحديث قائمة الغرف المتاحة للمعلم ---
+async function loadMyRooms() {
+    if (!currentUser) return;
+    const res = await fetch(`${DB_URL}/rooms.json`);
+    const rooms = await res.json();
+    const select = document.getElementById('target-room-select');
+    
+    // تفريغ القائمة أولاً
+    select.innerHTML = '<option value="">-- اختر الغرفة التي تريد النشر فيها --</option>';
+
+    if (rooms) {
+        Object.keys(rooms).forEach(key => {
+            const room = rooms[key];
+            // عرض الغرف الخاصة بهذا المعلم فقط
+            if (room.teacher === currentUser.name) {
+                const option = document.createElement('option');
+                option.value = key; // استخدام الـ ID الفريد من فايربيس
+                option.text = room.name;
+                select.appendChild(option);
+            }
+        });
+        alert("تم تحديث قائمة غرفك بنجاح!");
+    }
+}
+
+    </script>
+</body>
+</html>
